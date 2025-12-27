@@ -1,5 +1,7 @@
 # CHAT2API
 
+> 🍴 **Fork of [lanqian528/chat2api](https://github.com/lanqian528/chat2api)** - Enhanced with English documentation
+
 🤖 A simple ChatGPT TO API proxy
 
 🌟 Use free, unlimited `GPT-3.5` without an account

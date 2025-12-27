@@ -152,7 +152,8 @@ OpenAI-compatible chat completions endpoint.
 
 #### POST `/v1/chat/completions`
 
-**Request:**
+**Basic Text Request:**
+
 ```bash
 curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
 --header 'Content-Type: application/json' \
@@ -164,7 +165,99 @@ curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
 }'
 ```
 
-**With Image (Base64):**
+---
+
+### Supported Content Types
+
+When sending files/attachments, use the `content` array format with different `type` values:
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `text` | Plain text message | Always required with files |
+| `image_url` | Images and files via URL or Base64 | All file uploads |
+
+---
+
+### Supported File Formats
+
+#### Images (Multimodal)
+
+| Format | MIME Type | Extension |
+|--------|-----------|-----------|
+| JPEG | `image/jpeg` | `.jpg`, `.jpeg` |
+| PNG | `image/png` | `.png` |
+| GIF | `image/gif` | `.gif` |
+| WebP | `image/webp` | `.webp` |
+
+#### Documents
+
+| Format | MIME Type | Extension |
+|--------|-----------|-----------|
+| PDF | `application/pdf` | `.pdf` |
+| Word | `application/msword` | `.doc` |
+| Word (new) | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | `.docx` |
+| PowerPoint | `application/vnd.openxmlformats-officedocument.presentationml.presentation` | `.pptx` |
+| Excel | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | `.xlsx` |
+| Plain Text | `text/plain` | `.txt` |
+| Markdown | `text/markdown` | `.md` |
+| HTML | `text/html` | `.html` |
+| JSON | `application/json` | `.json` |
+| LaTeX | `text/x-tex` | `.tex` |
+
+#### Code Files
+
+| Format | MIME Type | Extension |
+|--------|-----------|-----------|
+| Python | `text/x-script.python` | `.py` |
+| JavaScript | `text/javascript` | `.js` |
+| TypeScript | `text/x-typescript` | `.ts` |
+| Java | `text/x-java` | `.java` |
+| C | `text/x-c` | `.c` |
+| C++ | `text/x-c++` | `.cpp` |
+| C# | `text/x-csharp` | `.cs` |
+| PHP | `text/x-php` | `.php` |
+| Ruby | `text/x-ruby` | `.rb` |
+| Shell | `text/x-sh` | `.sh` |
+
+#### Archives & Others
+
+| Format | MIME Type | Extension |
+|--------|-----------|-----------|
+| ZIP | `application/zip` | `.zip` |
+| RAR | `application/vnd.rar` | `.rar` |
+| 7z | `application/x-7z-compressed` | `.7z` |
+| TAR | `application/x-tar` | `.tar` |
+| MP3 | `audio/mpeg` | `.mp3` |
+| MP4 | `video/mp4` | `.mp4` |
+
+---
+
+### File Upload Examples
+
+#### Image via Base64
+
+```bash
+# First, encode image to base64
+BASE64=$(base64 -w0 image.png)
+
+# Send request
+curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_TOKEN' \
+--data "{
+  \"model\": \"gpt-4o\",
+  \"messages\": [{
+    \"role\": \"user\",
+    \"content\": [
+      {\"type\": \"text\", \"text\": \"What is in this image?\"},
+      {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:image/png;base64,$BASE64\"}}
+    ]
+  }]
+}"
+```
+
+#### Image via URL
+
 ```bash
 curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
 --header 'Content-Type: application/json' \
@@ -174,14 +267,59 @@ curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
   "messages": [{
     "role": "user",
     "content": [
-      {"type": "text", "text": "What is in this image?"},
-      {"type": "image_url", "image_url": {"url": "data:image/png;base64,iVBORw0KGgo..."}}
+      {"type": "text", "text": "Describe this image"},
+      {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
     ]
   }]
 }'
 ```
 
-**With Image (URL):**
+#### PDF Document via Base64
+
+```bash
+# Encode PDF to base64
+BASE64=$(base64 -w0 document.pdf)
+
+# Send request
+curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_TOKEN' \
+--data "{
+  \"model\": \"gpt-4o\",
+  \"messages\": [{
+    \"role\": \"user\",
+    \"content\": [
+      {\"type\": \"text\", \"text\": \"Summarize this PDF document\"},
+      {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:application/pdf;base64,$BASE64\"}}
+    ]
+  }]
+}"
+```
+
+#### Code File via Base64
+
+```bash
+# Encode Python file to base64
+BASE64=$(base64 -w0 script.py)
+
+# Send request
+curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_TOKEN' \
+--data "{
+  \"model\": \"gpt-4o\",
+  \"messages\": [{
+    \"role\": \"user\",
+    \"content\": [
+      {\"type\": \"text\", \"text\": \"Review this Python code and suggest improvements\"},
+      {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:text/x-script.python;base64,$BASE64\"}}
+    ]
+  }]
+}"
+```
+
+#### Multiple Files
+
 ```bash
 curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
 --header 'Content-Type: application/json' \
@@ -191,12 +329,52 @@ curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
   "messages": [{
     "role": "user",
     "content": [
-      {"type": "text", "text": "What is in this image?"},
-      {"type": "image_url", "image_url": {"url": "https://example.com/image.png"}}
+      {"type": "text", "text": "Compare these two images"},
+      {"type": "image_url", "image_url": {"url": "https://example.com/image1.png"}},
+      {"type": "image_url", "image_url": {"url": "https://example.com/image2.png"}}
     ]
   }]
 }'
 ```
+
+#### Using UPLOAD_BY_URL Mode
+
+When `UPLOAD_BY_URL=true`, you can send URLs directly in the message text:
+
+```bash
+curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_TOKEN' \
+--data '{
+  "model": "gpt-4o",
+  "messages": [{
+    "role": "user",
+    "content": "https://example.com/image.png https://example.com/doc.pdf Analyze these files"
+  }]
+}'
+```
+
+---
+
+### Image Detail Parameter
+
+For images, you can specify the detail level:
+
+```json
+{
+  "type": "image_url",
+  "image_url": {
+    "url": "https://example.com/image.png",
+    "detail": "high"
+  }
+}
+```
+
+| Detail | Description | Token Usage |
+|--------|-------------|-------------|
+| `low` | Lower resolution, faster | ~85 tokens |
+| `high` | Full resolution | ~170+ tokens per tile |
+| `auto` | Automatic selection (default) | Varies |
 
 ---
 

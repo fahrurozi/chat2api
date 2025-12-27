@@ -354,6 +354,38 @@ curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
 }'
 ```
 
+#### Large Files (Using JSON File)
+
+For large files that exceed command line limits, save the request to a JSON file:
+
+```bash
+# Download and encode file
+wget -O document.pdf "https://example.com/document.pdf"
+BASE64=$(base64 -w0 document.pdf)
+
+# Create JSON request file
+cat > request.json << EOF
+{
+  "model": "gpt-4o",
+  "messages": [{
+    "role": "user",
+    "content": [
+      {"type": "text", "text": "Summarize this document"},
+      {"type": "image_url", "image_url": {"url": "data:application/pdf;base64,$BASE64"}}
+    ]
+  }]
+}
+EOF
+
+# Send request from file
+curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_TOKEN' \
+--data @request.json
+```
+
+> **Note:** Use `--data @filename` (with `@`) to read request body from file.
+
 ---
 
 ### Image Detail Parameter

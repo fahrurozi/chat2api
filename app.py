@@ -18,9 +18,9 @@ log_config["formatters"]["default"]["fmt"] = default_format
 log_config["formatters"]["access"]["fmt"] = access_format
 
 app = FastAPI(
-    docs_url=f"/{api_prefix}/docs",    # 设置 Swagger UI 文档路径
-    redoc_url=f"/{api_prefix}/redoc",  # 设置 Redoc 文档路径
-    openapi_url=f"/{api_prefix}/openapi.json"  # 设置 OpenAPI JSON 路径
+    docs_url=f"/{api_prefix}/docs",    # Set Swagger UI docs path
+    redoc_url=f"/{api_prefix}/redoc",  # Set Redoc docs path
+    openapi_url=f"/{api_prefix}/openapi.json"  # Set OpenAPI JSON path
 )
 
 app.add_middleware(
